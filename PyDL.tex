@@ -1,0 +1,152 @@
+\documentclass[12pt,a4paper,UTF8]{ctexart}
+\usepackage{enumerate}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{color,xcolor}
+\lstset{
+	backgroundcolor=\color{red!50!green!50!blue!50},%代码块背景色为浅灰色
+	rulesepcolor= \color{gray}, %代码块边框颜色
+	breaklines=true,  %代码过长则换行
+	numbers=left, %行号在左侧显示
+	numberstyle= \small,%行号字体
+	keywordstyle= \color{blue},%关键字颜色
+	commentstyle=\color{gray}, %注释颜色
+	frame=shadowbox%用方框框住代码块
+	frame=single，
+}
+
+\title{Python 大作业}
+\author{PB18020694 刘洪辰}
+\date{}
+
+\begin{document}
+    \maketitle
+    \section{任务说明}
+    \begin{enumerate}
+        \item 学习利用API文档进行API相关的python编程.
+        \item 学习GUI相关的python编程
+        \item 对\url{https://gank.io/} API编程和GUI展示
+    \end{enumerate}
+    \section{实验细节}
+    \subsection{API相关的说明}
+    \subsubsection{首页banner轮播}
+    \url{https://gank.io/api/v2/banners} 请求方式: GET
+    注:返回首页banner轮播的数据
+    \subsubsection{分类API}
+    \url{https://gank.io/api/v2/categories/<category_type>} 请求方式: GET
+    注:获取所有分类具体子分类[types]数据
+    \begin{enumerate}
+        \item category\_type 可接受参数 Article \textbar GanHuo \textbar Girl
+        \item Article: 专题分类、 GanHuo: 干货分类 、 Girl:图片
+    \end{enumerate}
+    \subsubsection{分类数据API(子分类具体数据)}
+    \url{https://gank.io/api/v2/data/category/<category>/type/<type>/page/<page>/count/<count>}
+    请求方式: GET
+    \begin{enumerate}
+        \item category 可接受参数 All(所有分类) | Article | GanHuo | Girl
+        \item type 可接受参数 All(全部类型) | Android | iOS | Flutter | Girl | app | frontend 等，即分类API返回的类型数据
+        \item count: [10, 50]
+        \item page: >=1
+    \end{enumerate}
+    \subsubsection{随机API}
+    \url{https://gank.io/api/v2/random/category/<category>/type/<type>/count/<count>}
+    请求方式: GET
+    \begin{enumerate}
+        \item category 可接受参数 Article | GanHuo | Girl
+        \item type 可接受参数 Android | iOS | Flutter | Girl，即分类API返回的类型数据
+        \item count: [1, 50]
+    \end{enumerate}
+    \subsubsection{文章详情 API}
+    \url{https://gank.io/api/v2/post/<post_id>}
+    请求方式: GET
+    \begin{enumerate}
+        \item post\_id 可接受参数 文章id[分类数据API返回的\_id字段]
+    \end{enumerate}
+    \subsubsection{本周最热 API}
+    \url{https://gank.io/api/v2/hot/<hot_type>/category/<category>/count/<count>}
+    请求方式: GET
+    \begin{enumerate}
+        \item hot\_type 可接受参数 views（浏览数） | likes（点赞数） | comments（评论数）
+        \item category 可接受参数 Article | GanHuo | Girl
+        \item count: [1, 20]
+    \end{enumerate}
+    \subsubsection{文章评论获取 API}
+    \url{https://gank.io/api/v2/post/comments/<post_id>}
+    请求方式: GET
+    \begin{enumerate}
+        \item post\_id 可接受参数 文章Id
+    \end{enumerate}
+    \subsubsection{搜索API}
+    \url{https://gank.io/api/v2/search/<search>/category/<category>/type/<type>/page/<page>/count/<count>}
+    请求方式: GET
+    \begin{enumerate}
+        \item search 可接受参数 要搜索的内容
+        \item category 可接受参数 All[所有分类] | Article | GanHuo
+        \item type 可接受参数 Android | iOS | Flutter ...，即分类API返回的类型数据
+        \item count: [10, 50]
+        \item page: >=1
+    \end{enumerate}
+    \subsection{设计的类}
+    设计的类包含$Ui\_Dialog;MainDialog,NewWin$,其中$Class MainDialog$最为复杂,所以仅介绍此部分.
+MainDialog是QDialog的一个子类.
+\begin{lstlisting}[language={python}]
+def __init__(self):
+    super().__init__()
+    self.ui = Ui_Dialog()
+    self.ui.setupUi(self)
+\end{lstlisting}
+这部分通过Ui\_Dialog()定义了可视化的基本布局.包含按钮位置,文本框位置,选择按钮位置.
+\begin{lstlisting}[language={python}]
+def queryArticle(self):
+    Category = self.ui.comboBox1.currentText()
+    Type = self.ui.comboBox2.currentText()
+    CategoryCode = self.get_CategoryCode(Category)
+    TypeCode = self.get_TypeCode(Type)
+    r = requests.get("https://gank.io/api/v2/data/category/{}/type/{}/page/1/count/10".format(CategoryCode,TypeCode))
+\end{lstlisting}
+这一部分相当于调用接口,Category和Type为用户选择的选项的反馈,并通过get\_CategoryCode,get\_TypeCode两个函数变为对应的API代码.
+其中ge\_CategoryCode代码如下,get\_TypeCode代码与之类似遂省略.
+\begin{lstlisting}[language={python}]
+def get_CategoryCode(self, Category):
+    CategoryDict = {"Article": "Article",
+                "Skill": "GanHuo",
+                "Girl": "Girl"}  
+    return CategoryDict.get(Category)
+\end{lstlisting}
+\begin{lstlisting}
+def searchText(self):
+    item = self.ui.textEdit.text()
+    r = requests.get("https://gank.io/api/v2/search/{}/category/All/type/All/page/1/count/10".format(item))
+    ...
+    self.ui.textEdit2.setText(Msg2)
+\end{lstlisting}
+这一部分为利用查找API进行查找,输入通过textEit.text进行读取后进行查找.进行反馈后,通过settext进行展现.
+\begin{lstlisting}
+def clearText(self):
+    self.ui.textEdit.clear()
+\end{lstlisting}
+这一部分为点击按钮后对搜索框的内容进行清除.
+\begin{lstlisting}
+def detialText1(self):
+    global idd
+    idd = self.r.json()['data'][0]['_id']
+    self.child_win = NewWinGirl()
+    self.child_win.show()
+    self.child_win.exec_()
+\end{lstlisting}
+这里遇到的难点为如何将这个窗口内request的结果传递给下一个窗口,我采用了设置全局变量的方法,传递文章对应的id.
+此外如何创建新的子窗口也为本次作业中卡的时间较长的部分.
+在class NewWin(QDialog)中:
+\begin{lstlisting}
+self.lb = QLabel(self)
+self.lb.setText("<A href='{}'>The Url</a>".format(self.r.json()['data']['url']))
+self.lb.setOpenExternalLinks(True)
+\end{lstlisting}
+这里为利用QLable创建超链接,直接打开网页.
+
+此外,编写代码的过程中通过API获取数据后,对json文件的操作,可以堪称字典和列表的套娃,进行操作起来比较方便.
+    \section{界面布局}
+    界面布局采用了QGridLayout和setGeometry(QtCore.QRect())相结合的方法.此外,利用QGroupBox进行分块有利于界面的布局的美观.主窗口和子窗口具体布局可以参见视频
+    \section{实验总结}
+本次编程的结果虽有些地方想要改进但未找到具体可行的办法,但总体来说较为满意,运行结果符合预期.本次实验最大的收获是了解了API和GUI,通过自己阅读API文档进行编程,到设计GUI进行成果展现也提高了自己的编程能力.
+\end{document}
