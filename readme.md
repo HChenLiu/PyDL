@@ -1,1 +1,1 @@
-readme
+the python homework that using API and GUI

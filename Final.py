@@ -1,7 +1,14 @@
+# -*- coding: utf-8 -*-
 import sys
 import UiSet
-from PyQt5.QtWidgets import QApplication, QDialog
+import cv2 as cv
+import numpy as np
+from PyQt5 import QtCore
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QGridLayout, QLabel, QPushButton, QGroupBox
 import requests
+
+idd = '0'
 
 class MainDialog(QDialog):
     def __init__(self):
@@ -12,49 +19,193 @@ class MainDialog(QDialog):
     def queryArticle(self):
         Category = self.ui.comboBox1.currentText()
         Type = self.ui.comboBox2.currentText()
-        CategoryCode = self.get_CategoryCode(Category)
-        TypeCode = self.get_TypeCode(Type)
-        
-        r = requests.get("https://gank.io/api/v2/data/category/{}/type/{}/page/1/count/10".format(CategoryCode,TypeCode))
-
-        print(r.json())
-        
-        if r.json().get('status') == 200:
-            weatherMsg = '城市：{}\n日期：{}\n天气：{}\nPM 2.5：{} {}\n温度：{}\n湿度：{}\n风力：{}\n\n{}'.format(
-                r.json()['cityInfo']['city'],
-                r.json()['data']['forecast'][0]['ymd'],
-                r.json()['data']['forecast'][0]['type'],
-                int(r.json()['data']['pm25']),
-                r.json()['data']['quality'],
-                r.json()['data']['wendu'],
-                r.json()['data']['shidu'],
-                r.json()['data']['forecast'][0]['fl'],
-                r.json()['data']['forecast'][0]['notice'],
-            )
+        if Category == 'Girl':
+            CategoryCode = 'Girl'
+            TypeCode = 'Girl'
         else:
-            weatherMsg = '天气查询失败，请稍后再试！'
-        
-        self.ui.textEdit.setText(weatherMsg)
+            CategoryCode = self.get_CategoryCode(Category)
+            TypeCode = self.get_TypeCode(Type)
+
+        self.r = requests.get("https://gank.io/api/v2/data/category/{}/type/{}/page/1/count/10".format(CategoryCode,TypeCode))
+        if self.r.json().get('status') == 100:
+            l = len(self.r.json()['data'])
+            if l >=3:
+                Msg2 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][0]['title'],
+                    self.r.json()['data'][0]['createdAt'],
+                    self.r.json()['data'][0]['author'],
+                    self.r.json()['data'][0]['title']
+                )
+                Msg3 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][1]['title'],
+                    self.r.json()['data'][1]['createdAt'],
+                    self.r.json()['data'][1]['author'],
+                    self.r.json()['data'][1]['desc']
+                )
+                Msg4 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][2]['title'],
+                    self.r.json()['data'][2]['createdAt'],
+                    self.r.json()['data'][2]['author'],
+                    self.r.json()['data'][2]['title']
+                )
+            else:
+                Msg2 = 'No Data'
+                Msg3 = 'No Data'
+                Msg4 = 'No Data'
+        else:
+            Msg2 = 'Query failed, please try later!'
+            Msg3 = 'Query failed, please try later!'
+            Msg4 = 'Query failed, please try later!'
+        self.ui.textEdit2.setText(Msg2)
+        self.ui.textEdit3.setText(Msg3)
+        self.ui.textEdit4.setText(Msg4)
     
     def get_CategoryCode(self, Category):
         CategoryDict = {"Article": "Article",
                     "Skill": "GanHuo",
-                    "Girl": "Girl"}
-                 
+                    "Girl": "Girl"}  
         return CategoryDict.get(Category)
 
     def get_TypeCode(self, Type):
         CategoryDict = {"Android": "Android",
                     "iOS": "iOS",
                     "Flutter": "Flutter",
-                    "frontend":"frontend",
+                    "Frontend":"frontend",
                     "app":"app"}
-                 
         return CategoryDict.get(Type)
     
     def clearText(self):
         self.ui.textEdit.clear()
 
+    def searchText(self):
+        item = self.ui.textEdit.text()
+        self.r = requests.get("https://gank.io/api/v2/search/{}/category/All/type/All/page/1/count/10".format(item))
+        if self.r.json().get('status') == 100:
+            l = len(self.r.json()['data'])
+            if l >=3:
+                Msg2 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][0]['title'],
+                    self.r.json()['data'][0]['createdAt'],
+                    self.r.json()['data'][0]['author'],
+                    self.r.json()['data'][0]['title']
+                )
+                Msg3 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][1]['title'],
+                    self.r.json()['data'][1]['createdAt'],
+                    self.r.json()['data'][1]['author'],
+                    self.r.json()['data'][1]['desc']
+                )
+                Msg4 = 'title:{}\ndata:{}\nauthor:{}\ndescribe:{}'.format(
+                    self.r.json()['data'][2]['title'],
+                    self.r.json()['data'][2]['createdAt'],
+                    self.r.json()['data'][2]['author'],
+                    self.r.json()['data'][2]['title']
+                )
+            else:
+                Msg2 = 'No Data'
+                Msg3 = 'No Data'
+                Msg4 = 'No Data'
+        else:
+            Msg2 = 'Query failed, please try later!'
+            Msg3 = 'Query failed, please try later!'
+            Msg4 = 'Query failed, please try later!'
+        self.ui.textEdit2.setText(Msg2)
+        self.ui.textEdit3.setText(Msg3)
+        self.ui.textEdit4.setText(Msg4)
+    
+    def detialText1(self):
+        global idd
+        idd = self.r.json()['data'][0]['_id']
+        if self.r.json()['data'][0]['category'] == 'Girl':
+            self.child_win = NewWinGirl()
+            self.child_win.show()
+            self.child_win.exec_()
+        else:
+            self.child_win = NewWin()
+            self.child_win.show()
+            self.child_win.exec_()
+
+    def detialText2(self):
+        global idd
+        idd = self.r.json()['data'][1]['_id']
+        if self.r.json()['data'][1]['category'] == 'Girl':
+            self.child_win = NewWinGirl()
+            self.child_win.show()
+            self.child_win.exec_()
+        else:
+            self.child_win = NewWin()
+            self.child_win.show()
+            self.child_win.exec_()
+
+    def detialText3(self):
+        global idd
+        idd = self.r.json()['data'][2]['_id']
+        if self.r.json()['data'][2]['category'] == 'Girl':
+            self.child_win = NewWinGirl()
+            self.child_win.show()
+            self.child_win.exec_()
+        else:
+            self.child_win = NewWin()
+            self.child_win.show()
+            self.child_win.exec_()
+
+class NewWinGirl(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        global idd
+        self.r = requests.get("https://gank.io/api/v2/post/{}".format(idd))
+        self.resize(300,200)
+        self.btnQuit = QPushButton('Quit', self)
+        self.lb1 = QLabel("content:\n{}".format(self.r.json()['data']['content']))
+        self.lb2 = QLabel("email:{}".format(self.r.json()['data']['email']))
+        self.lb3 = QLabel(self)
+        self.lb3.setText("<A href='{}'>The Url</a>".format(self.r.json()['data']['images'][0]))
+        self.lb3.setOpenExternalLinks(True)
+        self.lb4 = QLabel("author:{}".format(self.r.json()['data']['author']))
+        
+        layout = QGridLayout(self)
+        layout.addWidget(self.lb4, 1, 1, 1, 1)
+        layout.addWidget(self.lb1, 2, 1, 1, 1)
+        layout.addWidget(self.lb2, 3, 1, 1, 1)
+        layout.addWidget(self.lb3, 4, 1, 1, 1)
+        layout.addWidget(self.btnQuit, 5, 4, 1, 1)
+
+        self.btnQuit.clicked.connect(self.close)
+        
+class NewWin(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        global idd
+        self.r = requests.get("https://gank.io/api/v2/post/{}".format(idd))
+        self.resize(300,400)
+        self.btnQuit = QPushButton('Quit', self)
+        self.lb = QLabel(self)
+        self.lb.setText("<A href='{}'>The Url</a>".format(self.r.json()['data']['url']))
+        self.lb.setOpenExternalLinks(True)
+        self.lb1 = QLabel("title:{}".format(self.r.json()['data']['title']))
+        self.lb2 = QLabel("author:{}".format(self.r.json()['data']['author']))
+        self.lb3 = QLabel("author:{}".format(self.r.json()['data']['createdAt']))
+        self.lb4 = QLabel("type:{}-{}".format(self.r.json()['data']['category'],self.r.json()['data']['type']))
+        self.lb5 = QLabel("views:{};like Counts:{}".format(self.r.json()['data']['views'],self.r.json()['data']['likeCounts']))
+        self.lb6 = QLabel("description:{}".format(self.r.json()['data']['desc']))
+
+        layout = QGridLayout(self)
+        layout.addWidget(self.lb1, 1, 1, 1, 1)
+        layout.addWidget(self.lb2, 2, 1, 1, 1)
+        layout.addWidget(self.lb3, 3, 1, 1, 1)
+        layout.addWidget(self.lb4, 4, 1, 1, 1)
+        layout.addWidget(self.lb5, 5, 1, 1, 1)
+        layout.addWidget(self.lb6, 6, 1, 1, 1)
+        layout.addWidget(self.lb, 7, 1, 1, 1)
+        layout.addWidget(self.btnQuit, 8, 4, 1, 1)
+
+        self.btnQuit.clicked.connect(self.close)
 
 if __name__ == '__main__':
     myapp = QApplication(sys.argv)
