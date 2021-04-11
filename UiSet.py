@@ -2,13 +2,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
+        #Window name 
         Dialog.setObjectName("Python Dialog")
+        #window size
         Dialog.resize(800, 900)
+        #window groupBox
         self.groupBox1 = QtWidgets.QGroupBox(Dialog)
         self.groupBox1.setGeometry(QtCore.QRect(0, 0, 800, 900))
         #self.groupBox2 = QtWidgets.QGroupBox(Dialog)
         #self.groupBox2.setGeometry(QtCore.QRect(800, 0, 800, 900))
         #self.groupBox.setObjectName("groupBox")
+        #textEdit
         self.textEdit = QtWidgets.QLineEdit(self.groupBox1)
         self.textEdit.setGeometry(QtCore.QRect(20, 100, 500, 30))
         self.queryBtn2 = QtWidgets.QPushButton(Dialog)
@@ -21,6 +25,7 @@ class Ui_Dialog(object):
         self.textEdit4 = QtWidgets.QTextEdit(self.groupBox1)
         self.textEdit4.setGeometry(QtCore.QRect(20, 600, 500, 150))
         #self.textEdit.setObjectName("textEdit")
+        #window button
         self.collec_btn2 = QtWidgets.QPushButton(Dialog)
         self.collec_btn2.setGeometry(QtCore.QRect(550, 290, 75, 23))
         self.collec_btn2.setMaximumSize(QtCore.QSize(75, 16777215))
@@ -30,6 +35,7 @@ class Ui_Dialog(object):
         self.collec_btn4 = QtWidgets.QPushButton(Dialog)
         self.collec_btn4.setGeometry(QtCore.QRect(550, 690, 75, 23))
         self.collec_btn4.setMaximumSize(QtCore.QSize(75, 16777215))
+        #comboBox
         self.comboBox1 = QtWidgets.QComboBox(self.groupBox1)
         self.comboBox1.setGeometry(QtCore.QRect(200, 20, 91, 20))
         #self.comboBox.setObjectName("comboBox")
@@ -69,16 +75,20 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.groupBox1.setTitle(_translate("Dialog", "Category And Search"))
+        #comboBox1
         self.comboBox1.setItemText(0, _translate("Dialog", "Article"))
         self.comboBox1.setItemText(1, _translate("Dialog", "Skill"))
         self.comboBox1.setItemText(2, _translate("Dialog", "Girl"))
         self.label1.setText(_translate("Dialog", "Category 1"))
+        #comboBox2
         self.comboBox2.setItemText(0, _translate("Dialog", "Android"))
         self.comboBox2.setItemText(1, _translate("Dialog", "iOS"))
         self.comboBox2.setItemText(2, _translate("Dialog", "Flutter"))
         self.comboBox2.setItemText(3, _translate("Dialog", "Frontend"))
         self.comboBox2.setItemText(4, _translate("Dialog", "App"))
+        #label2
         self.label2.setText(_translate("Dialog", "Category 2"))
+        #button
         self.queryBtn.setText(_translate("Dialog", "Query"))
         self.queryBtn2.setText(_translate("Dialog","Search"))
         self.clearBtn.setText(_translate("Dialog", "Clear"))
