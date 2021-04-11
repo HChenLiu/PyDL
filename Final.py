@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 #the setting of UI of the main dialog
-import UiSet
+from UiSet import Ui_Dialog
 import cv2 as cv
 import numpy as np
 import requests
@@ -15,7 +15,7 @@ idd = '0'
 class MainDialog(QDialog):
     def __init__(self):
         super().__init__()
-        self.ui = UiSet.Ui_Dialog()
+        self.ui = Ui_Dialog()
         self.ui.setupUi(self)
     
     #Classification query
